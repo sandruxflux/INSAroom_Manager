@@ -14,11 +14,11 @@ public class DoorService {
 		return door;
 		}
 	
-	public void openDoor( ) {
+	public void openDoor() {
 		door.setClosed(false);
 		}
 	
-	public void closeDoor( ) {
+	public void closeDoor() {
 		door.setClosed(true);
 		}
 

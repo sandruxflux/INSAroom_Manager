@@ -1,5 +1,6 @@
 package fr.insa.project.DoorMS.Controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,11 +10,12 @@ import fr.insa.project.DoorMS.Service.DoorService;
 import fr.insa.project.DoorMS.model.DoorState;
 
 @RestController
-@RequestMapping
+@RequestMapping("/door")
 
 public class DoorController {
 	
-	DoorService doorService = new DoorService();
+	@Autowired
+	DoorService doorService;
 	
 	@GetMapping("/status")
 	public DoorState getStatus() {

@@ -11,7 +11,7 @@ import fr.insa.project.LightMS.model.LightState;
 
 
 @RestController
-@RequestMapping
+@RequestMapping("/light")
 
 
 public class LightController {

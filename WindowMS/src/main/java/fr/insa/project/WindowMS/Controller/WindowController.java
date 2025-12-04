@@ -1,5 +1,6 @@
 package fr.insa.project.WindowMS.Controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,12 +12,14 @@ import fr.insa.project.WindowMS.model.WindowState;
 
 
 @RestController
-@RequestMapping
+@RequestMapping("/window")
 
 
 public class WindowController {
 	
-	WindowService windowService = new WindowService();
+
+    @Autowired
+    private WindowService windowService;
 	
 	@GetMapping("/status")
 	public WindowState getStatus() {

@@ -10,7 +10,6 @@ public class LightService {
 	private LightState light = new LightState();
 	
 	public LightState getLightState() {
-		
 		return light;
 	}
 	
