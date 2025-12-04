@@ -1,6 +1,8 @@
 package fr.insa.project.PresenceMS.Controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,14 +14,23 @@ import fr.insa.project.PresenceMS.model.PresenceState;
 
 public class PresenceController {
 
-    private final PresenceService presenceService;
+	@Autowired
+    private PresenceService presenceService;
 
-    public PresenceController(PresenceService presenceService) {
-        this.presenceService = presenceService;
+    @GetMapping("/status")
+    public PresenceState getStatus() {
+        return presenceService.getPresenceState();
     }
 
-    @GetMapping
-    public PresenceState getPresence() {
-        return presenceService.getPresence();
+    @PostMapping("/detect")
+    public PresenceState detectPresence() {
+        presenceService.setDetected(true);
+        return presenceService.getPresenceState();
+    }
+
+    @PostMapping("/clear")
+    public PresenceState clearPresence() {
+        presenceService.setDetected(false);
+        return presenceService.getPresenceState();
     }
 }

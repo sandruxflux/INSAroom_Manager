@@ -7,11 +7,15 @@ import fr.insa.project.PresenceMS.model.PresenceState;
 @Service
 
 public class PresenceService {
-	
-	private PresenceState state = new PresenceState(false);
-	
-	public PresenceState getPresence() {
-		return state;
-	}
 
+    private final PresenceState presence = new PresenceState();
+
+    public PresenceState getPresenceState() {
+        return presence;
+    }
+
+    public void setDetected(boolean detected) {
+        presence.setDetected(detected);
+    }
+  
 }
