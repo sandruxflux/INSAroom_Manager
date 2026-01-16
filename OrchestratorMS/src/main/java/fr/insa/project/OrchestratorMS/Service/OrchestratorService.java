@@ -4,110 +4,120 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import fr.insa.project.OrchestratorMS.model.AlarmState;
+import fr.insa.project.OrchestratorMS.model.Room;
+import fr.insa.project.OrchestratorMS.model.RoomState;
+import fr.insa.project.OrchestratorMS.model.ServiceUrl;
+import fr.insa.project.OrchestratorMS.repository.RoomRepository;
+import fr.insa.project.OrchestratorMS.repository.RoomStateRepository;
+import fr.insa.project.OrchestratorMS.repository.ServiceUrlRepository;
+import jakarta.annotation.PostConstruct;
 
 @Service
 
 public class OrchestratorService {
 	
 	private final RestTemplate restTemplate;
+	private final RoomRepository roomRepository;
+	private final RoomStateRepository roomStateRepository;
+	private final ServiceUrlRepository serviceUrlRepository;
 	
-    private final String doorUrl = "http://localhost:8081/door";
-    private final String lightUrl = "http://localhost:8082/light";
-    private final String windowUrl = "http://localhost:8083/window";
-    private final String presenceUrl = "http://localhost:8084/presence";
 	
-    public OrchestratorService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
-    
-    private final AlarmState alarm = new AlarmState();
-    
-    public AlarmState getAlarmState() {
-        return alarm;
-    }
-    
-    
- // Mode nuit : fermer portes/fenêtres, éteindre lumière et vérifier présence
-    
-    public void nightMode() {
-        restTemplate.postForObject(doorUrl + "/close", null, String.class);
-        restTemplate.postForObject(windowUrl + "/close", null, String.class);
-        restTemplate.postForObject(lightUrl + "/off", null, String.class);
+	public OrchestratorService(RestTemplate restTemplate,
+			RoomRepository roomRepository,
+			RoomStateRepository roomStateRepository, 
+			ServiceUrlRepository serviceUrlRepository) 
+	{
+			this.restTemplate = restTemplate;
+			this.roomRepository = roomRepository;
+			this.roomStateRepository = roomStateRepository;
+			this.serviceUrlRepository = serviceUrlRepository;
+	}
+	
+	 public Room getRoomByName(String name) { 
+		 return roomRepository.findByName(name) 
+			.orElseThrow(() -> new RuntimeException("Room not found")); 
+		 } 
+	 public ServiceUrl getServiceByName(String name) { 
+		 return serviceUrlRepository.findByServiceName(name) 
+			.orElseThrow(() -> new RuntimeException("Service Url not found")); 
+		 } 
+	
+	 public void nightMode(String roomName) {
+		 Room room = roomRepository.findByName(roomName)
+		 .orElseThrow(() -> new RuntimeException("Room not found: " + roomName));
 
-        // Vérifie la présence et déclenche l’alarme si nécessaire
-        checkPresence();
+		 // Pour chaque service dans la table
+		 sendCommand(room, "door_service", "close");
+		 sendCommand(room, "window_service", "close");
+		 sendCommand(room, "light_service", "off");
+		 sendCommand(room, "presence_service", "status");
+		 }
+	 
+	 public void morningMode(String roomName) {
+		 Room room = roomRepository.findByName(roomName)
+		 .orElseThrow(() -> new RuntimeException("Room not found: " + roomName));
 
-        // Renvoie l'état de la porte
-        String doorStatus = restTemplate.getForObject(doorUrl + "/status", String.class);
-        System.out.println("Door state: " + doorStatus);
-        
-        // Renvoie l'état de la fenêtre
-        String windowStatus = restTemplate.getForObject(windowUrl + "/status", String.class);
-        System.out.println("Window state: " + windowStatus);
-        
-        // Renvoie l'état de la lumière
-        String lightStatus = restTemplate.getForObject(lightUrl + "/status", String.class);
-        System.out.println("Light state: " + lightStatus);
-        
-        System.out.println("Alarm active: " + alarm.isActive());
-        
-        System.out.println("Orchestrator: Night mode activated");
-    }
+		 // Pour chaque service dans la table
+		 sendCommand(room, "door_service", "open");
+		 sendCommand(room, "window_service", "open");
+		 sendCommand(room, "light_service", "on");
+		 }
+	 
 
-    // Mode matin : ouvrir portes/fenêtres, allumer lumière, désactiver alarme
-    
-    public void morningMode() {
-        restTemplate.postForObject(doorUrl + "/open", null, String.class);
-        restTemplate.postForObject(windowUrl + "/open", null, String.class);
-        restTemplate.postForObject(lightUrl + "/on", null, String.class);
+		 private void sendCommand(Room room, String serviceName, String action) {
+		 ServiceUrl service = serviceUrlRepository.findByServiceName(serviceName)
+		 .orElseThrow(() -> new RuntimeException("Service not found: " + serviceName));
 
-        alarm.setActive(false);
-        
-        
-        //Possibilité de créer une fonction pour faire ça sans avoir à réécrire 2 fois la même chose
-        
-        // Renvoie l'état de la porte
-        String doorStatus = restTemplate.getForObject(doorUrl + "/status", String.class);
-        System.out.println("Door state: " + doorStatus);
-        
-        // Renvoie l'état de la fenêtre
-        String windowStatus = restTemplate.getForObject(windowUrl + "/status", String.class);
-        System.out.println("Window state: " + windowStatus);
-        
-        // Renvoie l'état de la lumière
-        String lightStatus = restTemplate.getForObject(lightUrl + "/status", String.class);
-        System.out.println("Light state: " + lightStatus);
-        
-        System.out.println("Alarm active: " + alarm.isActive());
-        System.out.println("Orchestrator: Morning mode activated");
-    }
-    
-    
+		 String result = null;
 
-    // Vérifie la présence via PresenceMS et déclenche l’alarme
-    
-    public void checkPresence() {
-        PresenceResponse response = restTemplate.getForObject(presenceUrl + "/status", PresenceResponse.class);
-        if (response != null && response.isDetected()) {
-            System.out.println("⚠️ ALERTE ! Présence détectée !");
-            alarm.setActive(true);
-        } else {
-            alarm.setActive(false);
-        }
-    }
+		 // On ne fait pas de POST pour check presence
+		 if (!serviceName.equals("presence_service")) {
+		 result = restTemplate.postForObject(service.getserviceUrl() + "/" + action, null, String.class);
+		 } else {
+		 PresenceResponse response = restTemplate.getForObject(service.getserviceUrl() + "/status", PresenceResponse.class);
+		 if (response != null && response.isDetected()) {
+		 result = "Presence detected! Alarm activated";
+		 } else {
+		 result = "No presence detected";
+		 }
+		 }
 
-    
-    // Classe interne pour parser le JSON renvoyé par PresenceMS
-    
-    static class PresenceResponse {
-        private boolean detected;
+		 // Log automatique
+		 RoomState log = new RoomState();
+		 log.setRoomName(room.getName());
+		 log.setServiceName(serviceName);
+		 log.setState(result);
+		 roomStateRepository.save(log);
 
-        public boolean isDetected() {
-            return detected;
-        }
+		 System.out.println("Action on " + serviceName + ": " + result);
+		 }
 
-        public void setDetected(boolean detected) {
-            this.detected = detected;
-        }
-    }
+		 static class PresenceResponse {
+		 private boolean detected;
+		 public boolean isDetected() { return detected; }
+		 public void setDetected(boolean detected) { this.detected = detected; }
+		 }
+		  
+		 
+		 public void nightModeForAllRooms() {
+			 roomRepository.findAll()
+			 .forEach(room-> nightMode(room.getName()));
+		 }
+		 
+		 public void morningModeForAllRooms() {
+			 roomRepository.findAll()
+			 .forEach(room-> morningMode(room.getName()));
+		 }
+		 
+		 public void simulatePresence(String roomName) {
+			 ServiceUrl service = serviceUrlRepository.findByServiceName("presence_service")
+					 .orElseThrow(() -> new RuntimeException("Service not found: " + "presence_service"));
+
+			 restTemplate.postForObject(service.getserviceUrl() + "/" + "detect", null, String.class);
+		 }
+	
+	
+
+	
+
 }

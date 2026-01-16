@@ -8,6 +8,8 @@ import fr.insa.project.WindowMS.model.WindowState;
 
 public class WindowService {
 	
+
+	
 	private WindowState window = new WindowState();
 	
 	public WindowState getWindowState() {
