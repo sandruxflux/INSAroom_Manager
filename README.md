@@ -14,13 +14,13 @@ Security: If presence is detected after 10:00 PM (22h), the system triggers an e
 The project follows a Microservices Architecture powered by Spring Boot and Spring Cloud.
 
 Components:
-1)**Eureka Server (EurekaServerMS)**: The Service Registry that allows microservices to find each other dynamically.
+1) **Eureka Server (EurekaServerMS)**: The Service Registry that allows microservices to find each other dynamically.
 
-2)**Orchestrator (OrchestratorMS)**: The "brain" of the system. It contains the business logic, communicates with Eureka to find services, and logs every action into a MySQL database.
+2) **Orchestrator (OrchestratorMS)**: The "brain" of the system. It contains the business logic, communicates with Eureka to find services, and logs every action into a MySQL database.
 
-3)**Actuator Microservices (LightMS, DoorMS, WindowsMS)**: Each service manages a specific hardware component. They are built with a standard Controller-Service-Model pattern.
+3) **Actuator Microservices (LightMS, DoorMS, WindowsMS)**: Each service manages a specific hardware component. They are built with a standard Controller-Service-Model pattern.
 
-4)**Sensor Microservice (PresenceMS)**: Monitors activity within the rooms to inform the Orchestrator's decisions.
+4) **Sensor Microservice (PresenceMS)**: Monitors activity within the rooms to inform the Orchestrator's decisions.
 
 # 🛠 Tech Stack
 **Framework**: Spring Boot 3.x
@@ -33,20 +33,14 @@ Components:
 
 **Tools**: Maven, Postman, Git/GitHub
 
-# 🚀 Getting Started
-1. Prerequisites
-Java 21
 
-MySQL Server
-
-Maven
 
 
 
 # 👥 Contributors
-Imane EL GHAIT 
+**Imane EL GHAIT** 
 
-Sandra BEJAOUI 
+**Sandra BEJAOUI** 
 
 
 
