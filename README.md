@@ -36,7 +36,7 @@ Components:
 # 1. Orchestrator Logic (OrchestratorMS) 
 The OrchestratorMS acts as the central intelligence of the system, managing the coordination between sensors and actuators without direct hardware control. It retrieves logical service names (e.g., http://DOORMS) from a MySQL database rather than using hardcoded IP addresses.
 
-# **Dynamic Decision Making**:
+# 2. Dynamic Decision Making
 
 Step 1: It queries the PresenceMS to check for human activity in the room.
 
@@ -46,7 +46,7 @@ Step 3 : If presence is detected at or after 22:00 (10 PM), the Orchestrator ove
 
 Every decision and resulting action is persisted in the RoomState MySQL table, providing a complete audit trail of the room's automation history.
 
-# 2.Internal Structure 
+# 3. **Internal Structure** 
 All our microservices (LightMS, DoorMS, WindowMS, PresenceMS) share the same professional architecture:
 
 1) **Controller/**: Handles incoming REST requests (e.g., POST /open, GET /status ....).
@@ -57,7 +57,7 @@ All our microservices (LightMS, DoorMS, WindowMS, PresenceMS) share the same pro
 
 4) **Resources/**: Holds configuration files like **application.properties** where the Eureka registration name is defined.
 
-# 3. **Eureka Discovery**
+# 4. **Eureka Discovery**
 The Eureka Server acts as the central,  is the core infrastructure component that enables dynamic discovery across the network by acting as a Service Registry for the entire microservices ecosystem.
 
 1) **Automatic Registration**: As soon as any microservice starts up, it registers its current IP address and port with Eureka.
